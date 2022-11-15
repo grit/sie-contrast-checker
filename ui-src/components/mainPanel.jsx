@@ -12,6 +12,7 @@ import { ContrastPreview } from './ContrastPreview'
 import { InputWithColor } from './Input'
 import { Text } from './Text'
 import { TooltipWrapper } from './Tooltip'
+import axios from 'axios';
 
 function MainPanel() {
   const backgroundColor = useStore(state => state.backgroundColor)
@@ -26,6 +27,7 @@ function MainPanel() {
   const setSelectionColor = useStore(state => state.setSelectionColor)
   const setSelectionMode = useStore(state => state.setSelectionMode)
   const selectionMode = useStore(state => state.selectionMode)
+  const setFrameBackground = useStore(state => state.frameBackground)
 
   useEffect(() => {
     if (typeof parent !== undefined) {
@@ -64,6 +66,19 @@ function MainPanel() {
       }
       if (message.type === 'selectionChange') {
         setSelectionColor(message.selectionColor)
+      }
+      if (message.type === 'frameRequest') {
+        const {fileKey, node, token} = message;
+        (async () => {
+          const response = await axios({
+            url: `https://api.figma.com/v1/images/${fileKey}?ids=${node}`,
+            method: 'get',
+            headers: {
+              'X-Figma-Token': token
+            }
+          });
+          console.log('response: ', response.data.images[node]);
+        })();
       }
     }
   }, [])

@@ -1,5 +1,6 @@
 import chroma from 'chroma-js'
 import { getApcaContrast } from './getApcaContrast'
+// import axios from 'axios';
 
 let selectionMode = 'none'
 
@@ -55,6 +56,44 @@ figma.on('selectionchange', () => {
         selectionColor: selectionColor.hex(),
       })
     }
+  }
+})
+
+figma.on('selectionchange', () => {
+  //get absoluteBoundingBox
+
+  const node = figma.currentPage.selection[0];
+  console.log(node);
+
+  if (node.backgrounds[0].type === 'IMAGE') {
+
+    let childNodeId;
+    let childNodeOpacity;
+    let nodeRef;
+
+    node.findChildren(n => {
+      nodeRef = n;
+      childNodeOpacity = n.opacity;
+      childNodeId = n.id;
+      n.opacity = 0;
+    });
+
+    let imgHash = figma.getImageByHash(node.backgrounds[0].imageHash);
+
+    (async () => {
+      let img = await imgHash.getBytesAsync(imgHash.hash);
+
+      const fileKey = 'VHJH8NA6ED7yf9AcxNkWhi';
+      const token = 'figd_0OXVW80lyvej5W-v782_im30pGRbalcx1-kxzZnT';
+
+      figma.ui.postMessage({
+        type: 'frameRequest',
+        fileKey,
+        token,
+        node: node.id
+      })
+
+    })();
   }
 })
 
